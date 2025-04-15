@@ -1,26 +1,28 @@
+# main_rpi.py
 import threading
-from flask import Flask
+from flask import Flask, request
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from cliente import loop_transmision
 from transmisor import detener_transmision
+from config import JWT_SECRET_KEY
 
-# ========== FLASK PARA DETENER ==========
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY  
+jwt = JWTManager(app)
 
 @app.route("/stop_transmission", methods=["POST"])
+@jwt_required()
 def stop():
-    print("[RPI] Solicitud de parada recibida desde el servidor")
+    identity = get_jwt_identity()
+    print(f"[RPI] Solicitud de parada recibida desde el servidor (identidad: {identity})")
+    # Opcional: Verificar el rol o permisos del solicitante
     detener_transmision()
     return {"mensaje": "Transmisión detenida correctamente"}, 200
-
 
 def iniciar_flask():
     app.run(host="0.0.0.0", port=8080)
 
-# ========== INICIO UNIFICADO ==========
 if __name__ == "__main__":
-    # Lanzar Flask en segundo plano
     flask_thread = threading.Thread(target=iniciar_flask, daemon=True)
     flask_thread.start()
-
-    # Iniciar lógica principal de transmisión
     loop_transmision()

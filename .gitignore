@@ -1,6 +1,14 @@
 
-venv/ bin/ lib/ lib64/ pyvenv.cfg
-pycache/ *.pyc *.pyo *.pyd
-*.pyc
+venv/ 
+bin/ 
+lib/ 
+lib64/ 
+pyvenv.cfg
+
+pycache/ 
+*.pyc 
+*.pyo 
+*.pyd
 .env
-*.log *.cache
+*.log 
+*.cache

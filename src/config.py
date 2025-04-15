@@ -4,13 +4,15 @@ ID_RPI = "rpi_001"
 SERVIDOR_URL = "http://192.168.1.91:5000"
 PUERTO_VIDEO = 5000
 
-# Comando GStreamer
-GST_COMMAND = (
-    "gst-launch-1.0 libcamerasrc ! "
-    "video/x-raw,width=640,height=480,framerate=30/1 ! "
-    "videoconvert ! "
-    "x264enc tune=zerolatency bitrate=1000 ! "
-    "h264parse config-interval=1 ! "
-    "rtph264pay config-interval=1 pt=96 mtu=1200 ! "
-    f"udpsink host=192.168.1.91 port={PUERTO_VIDEO} sync=false async=false"
-)
+JWT_SECRET_KEY = "clave_secreta_super_segura"
+
+# Parámetros para el video
+PUERTO_VIDEO = 5000
+VIDEO_WIDTH = 640
+VIDEO_HEIGHT = 480
+VIDEO_FRAMERATE = "30/1"
+VIDEO_HOST = "192.168.1.91"
+BITRATE_VIDEO = 1000
+MTU_VIDEO = 1100
+KEY_INT_MAX = 30
+SYNC_ENABLED = False
