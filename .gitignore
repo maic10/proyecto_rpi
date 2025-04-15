@@ -1,4 +1,6 @@
-venv/
-__pycache__/
+
+venv/ bin/ lib/ lib64/ pyvenv.cfg
+pycache/ *.pyc *.pyo *.pyd
 *.pyc
 .env
+*.log *.cache
