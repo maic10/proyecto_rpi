@@ -4,6 +4,7 @@ from flask import Flask, request
 from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity
 from cliente import loop_transmision
 from transmisor import detener_transmision
+from led_control import actualizar_estado_leds  # Importar desde led_control
 from config import JWT_SECRET_KEY
 
 app = Flask(__name__)
@@ -15,8 +16,8 @@ jwt = JWTManager(app)
 def stop():
     identity = get_jwt_identity()
     print(f"[RPI] Solicitud de parada recibida desde el servidor (identidad: {identity})")
-    # Opcional: Verificar el rol o permisos del solicitante
     detener_transmision()
+    actualizar_estado_leds(conexion_exitosa=True, transmision_activa=False)  # Actualizar LEDs tras detener
     return {"mensaje": "Transmisión detenida correctamente"}, 200
 
 def iniciar_flask():

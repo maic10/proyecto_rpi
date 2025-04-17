@@ -2,6 +2,7 @@
 import gi
 import threading
 import time
+from led_control import actualizar_estado_leds  # Cambiar a led_control
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 from config import *
@@ -44,6 +45,7 @@ def iniciar_transmision():
 
     threading.Thread(target=loop.run, daemon=True).start()
     print("[RPI] Transmisión iniciada.")
+    actualizar_estado_leds(conexion_exitosa=True, transmision_activa=True)
 
 def detener_transmision():
     global pipeline, loop
@@ -60,15 +62,19 @@ def detener_transmision():
         loop.quit()
         loop = None
 
+    actualizar_estado_leds(conexion_exitosa=True, transmision_activa=False)
+
 def on_bus_message(bus, message, loop):
     t = message.type
     if t == Gst.MessageType.EOS:
         print("[RPI] Fin de la transmisión")
         loop.quit()
+        actualizar_estado_leds(conexion_exitosa=True, transmision_activa=False)
     elif t == Gst.MessageType.ERROR:
         err, debug = message.parse_error()
         print(f"[RPI] Error en transmisión: {err}")
         loop.quit()
+        actualizar_estado_leds(conexion_exitosa=False, transmision_activa=False)
     elif t == Gst.MessageType.STATE_CHANGED:
         old, new, _ = message.parse_state_changed()
         if message.src == pipeline:
