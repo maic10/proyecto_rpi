@@ -1,8 +1,7 @@
-# transmisor.py
 import gi
 import threading
 import time
-from led_control import actualizar_estado_leds  # Cambiar a led_control
+from led_control import actualizar_estado_leds 
 gi.require_version("Gst", "1.0")
 from gi.repository import Gst, GLib
 from config import *
@@ -14,6 +13,11 @@ pipeline = None
 loop = None
 
 def iniciar_transmision():
+    """
+    Crea y arranca el pipeline de GStreamer para capturar video de la cámara,
+    codificarlo en H.264 y enviarlo por UDP al servidor.
+    También inicia un loop de GLib en un hilo separado para procesar mensajes.
+    """    
     global pipeline, loop
 
     if pipeline is not None:
@@ -22,7 +26,7 @@ def iniciar_transmision():
 
     print("[RPI] Iniciando transmisión de video...")
 
-    # Usar parámetros configurables
+    # Construye el pipeline usando parámetros de configuración
     pipeline = Gst.parse_launch(
         f"libcamerasrc ! "
         f"video/x-raw,width={VIDEO_WIDTH},height={VIDEO_HEIGHT},format=NV12,framerate={VIDEO_FRAMERATE} ! "
@@ -33,11 +37,13 @@ def iniciar_transmision():
         f"udpsink host={VIDEO_HOST} port={PUERTO_VIDEO} sync={'true' if SYNC_ENABLED else 'false'} async=false"
     )
 
+    # Crea el loop de mensajes de GStreamer
     loop = GLib.MainLoop()
     bus = pipeline.get_bus()
     bus.add_signal_watch()
     bus.connect("message", on_bus_message, loop)
 
+    # Arranca el pipeline; si falla, muestra error y termina
     ret = pipeline.set_state(Gst.State.PLAYING)
     if ret == Gst.StateChangeReturn.FAILURE:
         print("[RPI] Error al iniciar el pipeline")
@@ -48,6 +54,10 @@ def iniciar_transmision():
     actualizar_estado_leds(conexion_exitosa=True, transmision_activa=True)
 
 def detener_transmision():
+    """
+    Detiene el pipeline de GStreamer y cierra el loop.
+    Actualiza el estado de los LEDs para indicar que la transmisión ha parado.
+    """
     global pipeline, loop
 
     if pipeline is None:
@@ -65,6 +75,12 @@ def detener_transmision():
     actualizar_estado_leds(conexion_exitosa=True, transmision_activa=False)
 
 def on_bus_message(bus, message, loop):
+    """
+    Callback para recibir eventos del bus de GStreamer:
+    - EOS: fin de stream.
+    - ERROR: error en el pipeline.
+    - STATE_CHANGED: cambio de estado, útil para debug.
+    """
     t = message.type
     if t == Gst.MessageType.EOS:
         print("[RPI] Fin de la transmisión")
@@ -82,4 +98,8 @@ def on_bus_message(bus, message, loop):
     return True
     
 def transmision_activa():
+    """
+    Indica si actualmente existe un pipeline activo.
+    Devuelve True si la transmisión está en curso.
+    """
     return pipeline is not None

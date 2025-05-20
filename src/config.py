@@ -1,15 +1,13 @@
-# src/config.py
-
 ID_RPI = "rpi_001"
-SERVIDOR_URL = "http://192.168.1.91:5000"
+SERVIDOR_URL = "PATH_SERVER" // Cambiar por la ruta del servidor 
 PUERTO_VIDEO = 5000
 
-JWT_SECRET_KEY = "clave_secreta_super_segura"
+JWT_SECRET_KEY = "GgjdjE56742dhwwhf"
 
 # Parámetros para el video
 PUERTO_VIDEO = 5000
-VIDEO_WIDTH = 640
-VIDEO_HEIGHT = 480
+VIDEO_WIDTH = 960
+VIDEO_HEIGHT = 540
 VIDEO_FRAMERATE = "30/1"
 VIDEO_HOST = "192.168.1.91"
 BITRATE_VIDEO = 1000

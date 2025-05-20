@@ -1,4 +1,3 @@
-# src/led_control.py
 from gpiozero import LED
 
 # Configuración de los LEDs en los pines GPIO

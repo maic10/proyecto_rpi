@@ -1,11 +1,11 @@
-# src/cliente.py
 import time
 import requests
-from led_control import actualizar_estado_leds  # Cambiar a led_control
+from led_control import actualizar_estado_leds 
 from config import ID_RPI, SERVIDOR_URL
 from transmisor import iniciar_transmision, detener_transmision, transmision_activa
 
 def obtener_token():
+   # solicita token al servidor 
     try:
         print("[CLIENTE] Solicitando token JWT al servidor...")
         res = requests.post(f"{SERVIDOR_URL}/api/auth/raspberry", json={
@@ -26,7 +26,7 @@ def obtener_token():
         actualizar_estado_leds(conexion_exitosa=False, transmision_activa=False)
         return None
 
-# Configurar headers con el token
+# Obtener token y configurar headers
 token = obtener_token()
 if not token:
     print("[CLIENTE] No se pudo obtener el token. Finalizando...")
@@ -36,6 +36,7 @@ headers = {"Authorization": f"Bearer {token}"}
 PUERTO_RPI = 8080
 
 def solicitar_transmision():
+    # Pide permiso al servidor para empezar a transmitir
     try:
         print("[CLIENTE] Solicitando inicio de transmisión al servidor...")
         res = requests.post(f"{SERVIDOR_URL}/api/transmision/iniciar", json={
@@ -60,6 +61,7 @@ def solicitar_transmision():
     return None
 
 def verificar_estado_transmision():
+    # Bucle principal: si no transmite, pide permiso; si transmite, comprueba estado
     try:
         res = requests.post(f"{SERVIDOR_URL}/api/transmision/estado", json={
             "id_raspberry_pi": ID_RPI
@@ -80,6 +82,11 @@ def verificar_estado_transmision():
     return False
 
 def loop_transmision():
+    """
+    Bucle principal de control de transmisión:
+    - Si no se está transmitiendo, solicita permiso y, en caso afirmativo, inicia la transmisión.
+    - Si ya se está transmitiendo, verifica periódicamente con el servidor si debe continuar.
+    """    
     while True:
         if not transmision_activa():
             id_clase = solicitar_transmision()
@@ -87,14 +94,14 @@ def loop_transmision():
                 iniciar_transmision()
                 print("[CLIENTE] Transmisión iniciada.")
             else:
-                print("[CLIENTE] Reintento en 30 segundos...")
-            time.sleep(30)
+                print("[CLIENTE] Reintento en 15 segundos...")
+            time.sleep(15)
         else:
             if not verificar_estado_transmision():
                 print("[CLIENTE] Transmisión detenida por el servidor.")
             else:
-                print("[CLIENTE] Transmisión en curso. Verificando estado en 15 segundos...")
-            time.sleep(15)
+                print("[CLIENTE] Transmisión en curso. Verificando estado en 10 segundos...")
+            time.sleep(10)
 
 if __name__ == "__main__":
     inicializar_leds()  # Inicializar LEDs desde led_control
